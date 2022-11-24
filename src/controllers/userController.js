@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { token } from "morgan";
 import fetch from "node-fetch";
+import { render } from "pug";
 import User from "../models/User";
 
 export const getJoin = (req, res) => res.render("join", { pageTitle: "Join" });
@@ -37,8 +38,49 @@ export const postJoin = async (req, res) => {
 export const getEdit = (req, res) => {
     return res.render("edit-profile", { pageTitle: "Edit Profile" });
 };
-export const postEdit = (req, res) => {
-    return res.render("edit-profile");
+export const postEdit = async (req, res) => {
+    const {
+        session: {
+            user,
+            user: { _id },
+        },
+        body: { name, email, username, location },
+    } = req;
+
+    if (user.email !== email || user.username !== username) {
+        let dupCountWithoutSelf = 0;
+        const dupList = await User.find({
+            $or: [{ username }, { email }],
+        });
+
+        dupCountWithoutSelf = dupList.reduce((accumulator, currentValue) => {
+            const currentId = currentValue._id.toString();
+            if (currentId !== _id) {
+                return accumulator + 1;
+            }
+            return accumulator;
+        }, dupCountWithoutSelf);
+
+        if (dupCountWithoutSelf) {
+            return res.status(400).render("edit-profile", {
+                pageTitle: "Edit Profile",
+                errorMessage: "This username/email is already taken.",
+            });
+        }
+    }
+
+    const updateUser = await User.findByIdAndUpdate(
+        _id,
+        {
+            name,
+            email,
+            username,
+            location,
+        },
+        { new: true }
+    );
+    req.session.user = updateUser;
+    return res.redirect("edit-profile");
 };
 export const getLogin = (req, res) =>
     res.render("login", { pageTitle: "Log In" });
@@ -142,4 +184,14 @@ export const finishGithubLogin = async (req, res) => {
     } else {
         return res.redirect("/login");
     }
+};
+
+export const getChangePassword = (req, res) => {
+    return res.render("users/change-password", {
+        pageTitle: "Change Password",
+    });
+};
+export const postChangePassword = (req, res) => {
+    // Send notification
+    return res.redirect("/");
 };
