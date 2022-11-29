@@ -42,10 +42,13 @@ export const postEdit = async (req, res) => {
     const {
         session: {
             user,
-            user: { _id },
+            user: { _id, avatarUrl },
         },
         body: { name, email, username, location },
+        file,
     } = req;
+
+    // Email duplication check
 
     if (user.email !== email || user.username !== username) {
         let dupCountWithoutSelf = 0;
@@ -72,6 +75,7 @@ export const postEdit = async (req, res) => {
     const updateUser = await User.findByIdAndUpdate(
         _id,
         {
+            avatarUrl: file ? file.path : avatarUrl,
             name,
             email,
             username,
@@ -94,7 +98,7 @@ export const postLogin = async (req, res) => {
             errorMessage: "An account with this username does not exists.",
         });
     }
-    const ok = bcrypt.compare(password, user.password);
+    const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
         return res.status(400).render("login", {
             pageTitle,
@@ -109,7 +113,21 @@ export const logout = (req, res) => {
     req.session.destroy();
     return res.redirect("/");
 };
-export const see = (req, res) => res.send("See user");
+
+export const see = async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user) {
+        return res.status(400).render("404", { pageTitle: "User not found." });
+    }
+
+    return res.render("users/profile", {
+        pageTitle: `${user.name}`,
+        user,
+    });
+};
+
 export const startGithubLogin = (req, res) => {
     const baseUrl = "https://github.com/login/oauth/authorize";
     const config = {
@@ -168,7 +186,7 @@ export const finishGithubLogin = async (req, res) => {
         }
         let user = await User.findOne({ email: emailObj.email });
         if (!user) {
-            const user = await User.create({
+            user = await User.create({
                 name: userData.name,
                 username: userData.login,
                 email: emailObj.email,
@@ -191,7 +209,30 @@ export const getChangePassword = (req, res) => {
         pageTitle: "Change Password",
     });
 };
-export const postChangePassword = (req, res) => {
+export const postChangePassword = async (req, res) => {
+    const {
+        session: {
+            user: { _id },
+        },
+        body: { oldPassword, newPassword, newPasswordConfirmation },
+    } = req;
+    const user = await User.findById(_id);
+    const ok = bcrypt.compare(oldPassword, user.password);
+    if (!ok) {
+        return res.status(400).render("users/change-password", {
+            pageTitle: "Change Password",
+            errorMessage: "The current password is incorrect.",
+        });
+    }
+    if (newPassword !== newPasswordConfirmation) {
+        return res.status(400).render("users/change-password", {
+            pageTitle: "Change Password",
+            errorMessage: "The password does not match the confirmation.",
+        });
+    }
+
+    user.password = newPassword;
+    await user.save();
     // Send notification
-    return res.redirect("/");
+    return res.redirect("/users/logout");
 };

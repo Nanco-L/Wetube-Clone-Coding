@@ -2,9 +2,13 @@ extends base.pug
 include mixins/video
 
 block content
+    video(src="/" + video.fileUrl, controls)
     div
         p=video.description
         small=video.createdAt
-    a(href=`${video.id}/edit`) Edit Video &rarr;
-    br
-    a(href=`${video.id}/delete`) Delete Video &rarr;
+        br
+        small Uploaded by #{owner.name}
+    if String(video.owner) === String(loggedInUser._id)
+        a(href=`${video.id}/edit`) Edit Video &rarr;
+        br
+        a(href=`${video.id}/delete`) Delete Video &rarr;
