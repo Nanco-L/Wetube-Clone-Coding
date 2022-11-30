@@ -1,4 +1,9 @@
 extend ../base 
+include ../mixins/video
 
 block content 
-    h1 Hello
+    h2 Uploaded Videos
+    each video in user.videos 
+        +videoBlock(video) 
+    else 
+        li Empty
