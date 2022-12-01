@@ -2,8 +2,12 @@ extend ../base
 include ../mixins/video
 
 block content 
-    h2 Uploaded Videos
-    each video in user.videos 
-        +videoBlock(video) 
+    div.profile__data
+        img(src="/" + loggedInUser.avatarUrl).avatar
+        h3=user.name
+    if user.videos.length !== 0
+        div.video-grid
+            each video in user.videos 
+                +videoBlock(video)
     else 
-        li Empty
+        div.empty__message No videos found.

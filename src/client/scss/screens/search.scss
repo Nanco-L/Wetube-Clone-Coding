@@ -1,0 +1,29 @@
+.search__form {
+    display: flex;
+    align-items: center;
+    margin-bottom: 60px;
+    position: relative;
+
+    input {
+        padding-right: 60px;
+    }
+
+    .search__btn {
+        text-align: center;
+        height: 50px;
+        padding: 0;
+        background-color: $bg;
+        border: none;
+        width: 10%;
+        position: absolute;
+        right: 5px;
+        top: 1px;
+        cursor: pointer;
+
+        i {
+            background-color: $bg;
+            font-size: 30px;
+            color: white;
+        }
+    }
+}
