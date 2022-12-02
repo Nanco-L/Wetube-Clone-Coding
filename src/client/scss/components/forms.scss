@@ -9,7 +9,7 @@ form {
     }
 }
 
-input:not(input[type="range"]) {
+input:not(input[type="range"]):not(input[type="checkbox"]) {
     all: unset;
     padding: 15px 20px;
     border-radius: 5px;
