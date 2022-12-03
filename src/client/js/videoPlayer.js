@@ -11,6 +11,7 @@ const fullScreenBtn = document.getElementById("fullScreen");
 const fullScreenBtnIcon = fullScreenBtn.querySelector("i");
 const videoContainer = document.getElementById("videoContainer");
 const videoControls = document.getElementById("videoControls");
+const form = document.getElementById("commentForm");
 
 let controlsTimeout = null;
 let controlsMovementTimeout = null;
@@ -35,7 +36,11 @@ const handleVideoClick = (event) => {
 };
 
 const handleSpaceDown = (event) => {
-    if (event.code === "Space") {
+    let textarea = null;
+    if (form) {
+        textarea = form.querySelector("textarea");
+    }
+    if (event.code === "Space" && document.activeElement !== textarea) {
         switchPlayPause();
     }
 };

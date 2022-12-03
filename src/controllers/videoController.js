@@ -31,6 +31,7 @@ export const getEdit = async (req, res) => {
         return res.status(404).render("404", { pageTitle: "Video not found." });
     }
     if (String(video.owner) !== String(_id)) {
+        req.flash("error", "Not authorized");
         return res.status(403).redirect("/");
     }
     return res.render("edit", { pageTitle: `Edit ${video.title}`, video });
@@ -41,11 +42,12 @@ export const postEdit = async (req, res) => {
     const {
         user: { _id },
     } = req.session;
-    const video = await Video.exists({ _id: id });
+    const video = await Video.findById(id);
     if (!video) {
         return res.render("404", { pageTitle: "Video not found." });
     }
     if (String(video.owner) !== String(_id)) {
+        req.flash("error", "You are not the owner of this video.");
         return res.status(403).redirect("/");
     }
     const { title, description, hashtags } = req.body;
@@ -63,18 +65,18 @@ export const getUpload = (req, res) => {
 
 export const postUpload = async (req, res) => {
     const {
-        file: { path: fileUrl },
         body: { title, description, hashtags },
         session: {
             user: { _id },
         },
     } = req;
-
+    const { video, thumb } = req.files;
     try {
         const newVideo = await Video.create({
             title,
             description,
-            fileUrl,
+            fileUrl: video[0].path,
+            thumbUrl: thumb ? thumb[0].path : "no_thumbnail",
             hashtags: Video.formatHashtags(hashtags),
             owner: _id,
         });
@@ -95,7 +97,7 @@ export const deleteVideo = async (req, res) => {
     const {
         user: { _id },
     } = req.session;
-    const video = await Video.exists({ _id: id });
+    const video = await Video.findById(id);
     if (!video) {
         return res.render("404", { pageTitle: "Video not found." });
     }
@@ -128,4 +130,11 @@ export const registerView = async (req, res) => {
     video.meta.views += 1;
     await video.save();
     return res.sendStatus(200);
+};
+
+export const createComment = async (req, res) => {
+    console.log(req.params);
+    console.log(req.body);
+    console.log(req.body.text);
+    return res.end();
 };
