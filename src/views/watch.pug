@@ -20,26 +20,35 @@ block content
             div
                 span#fullScreen 
                     i.fas.fa-expand 
-    div
-        p=video.description
-        small=video.createdAt
-    div
-        if video.owner
-            small Uploaded by 
-                a(href=`/users/${video.owner._id}`) #{video.owner.name} 
-            div
-                if String(video.owner._id) === String(loggedInUser._id)
-                    a(href=`${video.id}/edit`) Edit Video &rarr;
-                    br
-                    a(href=`${video.id}/delete`) Delete Video &rarr;
-        else
-            small Uploaded by a user who has withdrawn 
+    div.video__data
+        p.video__title=video.title
+        p.video__description=video.description
+        small.video__createdAt=video.createdAt
+        div.video__owner
+            if video.owner
+                small Uploaded by 
+                    a(href=`/users/${video.owner._id}`) #{video.owner.name} 
+                div
+                    if String(video.owner._id) === String(loggedInUser._id)
+                        a(href=`${video.id}/edit`) Edit Video &rarr;
+                        br
+                        a(href=`${video.id}/delete`) Delete Video &rarr;
+            else
+                small Uploaded by a user who has withdrawn 
 
     if loggedIn
-        div.video__comments 
+        div.video__add-comments 
             form.video__comment-form#commentForm 
                 textarea(cols="30", rows="10", placeholder="Write a nice comment")
                 button Add comment
+    div.video__comments
+        ul 
+            each comment in video.comments.reverse() 
+                li.video__comment(data-id=comment.id)
+                    i.fas.fa-comment
+                    p  #{comment.text} 
+                    if String(comment.owner._id) === String(loggedInUser._id)
+                        i.fas.fa-trash-can
 block scripts
     script(src="/static/js/videoPlayer.js")
     if loggedIn
