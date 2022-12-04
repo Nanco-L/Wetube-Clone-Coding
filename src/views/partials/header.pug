@@ -19,7 +19,7 @@ header
                             span
                                 i.fas.fa-user.header__icon
                         else
-                            if loggedInUser.socialOnly 
+                            if loggedInUser.avatarUrl.includes("github") 
                                 img.header__avatar(src=loggedInUser.avatarUrl)
                             else
                                 img.header__avatar(src="/" + loggedInUser.avatarUrl)
