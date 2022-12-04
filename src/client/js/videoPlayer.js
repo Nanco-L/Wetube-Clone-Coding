@@ -70,9 +70,12 @@ const handleVolumeChange = (event) => {
 };
 
 const handleLoadedMetadata = () => {
-    totalTime.innerText = timeFormatter(video.duration);
-    if (Math.floor(video.duration) >= 3600) currentTime.innerText = "00:00:00";
-    timeline.max = Math.floor(video.duration);
+    if (!isNaN(video.duration)) {
+        totalTime.innerText = timeFormatter(video.duration);
+        if (Math.floor(video.duration) >= 3600)
+            currentTime.innerText = "00:00:00";
+        timeline.max = Math.floor(video.duration);
+    }
 };
 
 const handleTimeUpdate = () => {
@@ -137,7 +140,8 @@ muteBtn.addEventListener("click", handleMuteClick);
 volumeRange.addEventListener("input", handleVolumeChange);
 timeline.addEventListener("input", handleTimelineChange);
 fullScreenBtn.addEventListener("click", handleFullScreenClick);
-video.addEventListener("loadeddata", handleLoadedMetadata);
+video.addEventListener("canplay", handleLoadedMetadata);
+handleLoadedMetadata();
 video.addEventListener("timeupdate", handleTimeUpdate);
 video.addEventListener("click", handleVideoClick);
 video.addEventListener("ended", handleEnded);
